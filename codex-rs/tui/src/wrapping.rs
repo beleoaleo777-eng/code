@@ -632,6 +632,31 @@ impl<'a> RtOptions<'a> {
             ..self
         }
     }
+
+    /// Create options optimized for Armenian text.
+    ///
+    /// Armenian doesn't use hyphens for word breaking, so we use NoHyphenation.
+    pub fn for_armenian(width: usize) -> Self {
+        RtOptions {
+            width,
+            line_ending: textwrap::LineEnding::LF,
+            initial_indent: Line::default(),
+            subsequent_indent: Line::default(),
+            break_words: true,
+            word_separator: textwrap::WordSeparator::new(),
+            wrap_algorithm: textwrap::WrapAlgorithm::FirstFit,
+            word_splitter: textwrap::WordSplitter::NoHyphenation,
+        }
+    }
+
+    /// Returns true if this locale should use Armenian text configuration.
+    pub fn is_armenian_locale(locale: Option<&str>) -> bool {
+        if let Some(loc) = locale {
+            loc.starts_with("hy")
+        } else {
+            false
+        }
+    }
 }
 
 #[must_use]

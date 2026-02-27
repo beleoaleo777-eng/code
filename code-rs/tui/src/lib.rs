@@ -55,6 +55,7 @@ use uuid::Uuid;
 mod app;
 mod app_event;
 mod app_event_sender;
+mod armenian;
 mod account_label;
 mod bottom_pane;
 mod chrome_launch;
