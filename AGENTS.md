@@ -142,3 +142,32 @@ This architecture separates concerns between execution logic (core), UI state ma
 - Adjust the poll cadence via `--interval <seconds>` (defaults to 8). The script exits 0 on success and 1 on failure, so it can gate local automation.
 - Pass `--failure-logs` to automatically dump logs for any job that does not finish successfully.
 - Dependencies: GitHub CLI (`gh`) and `jq` must be available in `PATH`.
+
+## Cursor Cloud specific instructions
+
+### System dependencies
+
+The VM image ships with most build tools pre-installed (`gcc`, `g++`, `clang`, `pkg-config`, `make`, `git`). The update script installs `libssl-dev` if missing.
+
+### Build and run
+
+- Primary build validation: `./build-fast.sh` from repo root (builds `code-rs` workspace in `dev-fast` profile). First cold build takes ~6 min; incremental rebuilds are fast.
+- Binary output: `code-rs/bin/code` (copied there by `build-fast.sh`).
+- The TUI requires an `OPENAI_API_KEY` env var (or ChatGPT sign-in) for interactive AI features. Without it, the TUI starts and shows the auth picker.
+- See `README.md` "Development workflow" and `package.json` scripts for standard commands.
+
+### Tests
+
+- Run tests from `code-rs/`: `cargo nextest run --no-fail-fast` (uses toolchain from `code-rs/rust-toolchain.toml` = 1.90.0).
+- `test_collect_git_info_with_remote` may fail in sandboxed environments where git remote operations are constrained — this is environment-specific, not a code bug.
+
+### Lint
+
+- `pnpm run format` runs prettier on top-level files. Pre-existing style differences may show warnings.
+- `cargo clippy --tests` in `code-rs/` runs Rust lints. Per repo policy, do **not** run `rustfmt`.
+
+### Rust toolchains
+
+- `code-rs/` uses Rust 1.90.0 (`code-rs/rust-toolchain.toml`).
+- `codex-rs/` uses Rust 1.93.0 (`codex-rs/rust-toolchain.toml`).
+- `rustup` auto-selects the correct toolchain per workspace via `rust-toolchain.toml`.
