@@ -142,3 +142,24 @@ This architecture separates concerns between execution logic (core), UI state ma
 - Adjust the poll cadence via `--interval <seconds>` (defaults to 8). The script exits 0 on success and 1 on failure, so it can gate local automation.
 - Pass `--failure-logs` to automatically dump logs for any job that does not finish successfully.
 - Dependencies: GitHub CLI (`gh`) and `jq` must be available in `PATH`.
+
+## Cursor Cloud specific instructions
+
+### Services overview
+
+This is a terminal-based AI coding agent (Every Code). There is one main service: the Rust CLI binary built from `code-rs/`. No databases, Docker, or external services are required for building and testing.
+
+### Build & test
+
+- **Primary build check**: `./build-fast.sh` from repo root (uses `dev-fast` profile; ~6 min warm, 20+ min cold). Use a long timeout (600s+).
+- **Tests**: `cd code-rs && cargo nextest run --no-fail-fast` (~50s after build). The `test_collect_git_info_with_remote` test may fail in cloud environments due to token-authenticated git remote URLs; this is expected and not a code bug.
+- **Lint (JS/TS)**: `pnpm run format` from repo root. Pre-existing formatting issues exist in the repo.
+- **Built binary**: After `./build-fast.sh`, the binary is at `./code-rs/bin/code`. Use `./code-rs/bin/code --version` or `./code-rs/bin/code doctor` to verify.
+
+### Gotchas
+
+- The `code-rs/rust-toolchain.toml` pins Rust 1.90.0. The build script auto-installs it via rustup, but cold installs add time.
+- `cargo-nextest` requires Rust >= 1.91 to install from source. Install it using a newer toolchain (e.g., `rustup run 1.93.0 cargo install cargo-nextest --locked`) or use `cargo test` as a fallback.
+- `pnpm install --frozen-lockfile` may fail if the lockfile is out of date; use `pnpm install` without the flag.
+- The TUI requires an `OPENAI_API_KEY` or ChatGPT login for interactive use. CLI subcommands like `--version`, `--help`, and `doctor` work without credentials.
+- System deps required: `build-essential`, `pkg-config`, `clang`, `libssl-dev`.
